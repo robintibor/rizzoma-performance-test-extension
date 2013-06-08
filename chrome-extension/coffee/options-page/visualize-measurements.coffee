@@ -1,5 +1,6 @@
 displayAllMeasurements = ->
-    for searchWord in ["", "and", "local", "nonexistingword"]
+    #todo: just extract all searchwords from all measurements?...
+   for searchWord in ["", "and", "local", "nat", "nonexistingword"]
         displayMeasurementsForWord(searchWord)
 
 displayMeasurementsForWord = (searchWord) ->

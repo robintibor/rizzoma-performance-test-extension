@@ -13,7 +13,7 @@ askForNewMentionsAndDisplay = ->
 makePerformanceTest = ->
     if (userIsLoggedIn())
         # should get: all results, most reults, some results, no results
-        queryStrings = ["", "and", "local", "nonexistingword"]
+        queryStrings = ["", "and", "local", "nat", "nonexistingword"]
         makeSearchRequestsAndStoreDurations(queryStrings)
     
 userIsLoggedIn = ->
