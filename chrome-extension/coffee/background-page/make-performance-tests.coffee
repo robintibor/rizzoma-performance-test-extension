@@ -1,6 +1,7 @@
 window.rizzomaNotifications = window.rizzomaNotifications || {}
 
 _expressSessionId = null
+_lastTimeOfGettingAuthId = null
 
 intervalForPerformanceMeasureInMinutes = 10
 
@@ -42,8 +43,9 @@ storeRequestAndContinue = (queryString, timeBefore, remainingQueryStrings, answe
       console.log("got result....", answer)
       storeMeasurement(measurement)
       makeSearchRequestsAndStoreDurations(remainingQueryStrings)
-    else
-      console.log("result not possible to get, probably access token not valid")
+    else if (timeSinceGettingAuthIdLongEnough())
+      console.log ("searching didn't work mit #{_expressSessionId}, reinserting iframe")
+      reinsertRizzomaIFrameForGettingAuthId()
 
 storeMeasurement = (measurement) ->
     measurements = []
@@ -67,14 +69,22 @@ makeSearchRequest = (queryString, callback) ->
             success: callback
         }
     )
+
+timeSinceGettingAuthIdLongEnough = ->
+  minutesToWait = 20
+  minutesSinceGettingAuthId = (Date.now() - _lastTimeOfGettingAuthId) / (1000 * 60) # convert from ms to minutes
+  return minutesSinceGettingAuthId > minutesToWait 
+
+reinsertRizzomaIFrameForGettingAuthId = ->
+  $('body').append('<iframe src="https://rizzoma.com/topic/" id="rizzomaPerformanceIFrame"></iframe>')
     
 handleExpressSessionId = (expressSessionIdMessage) ->
-    # expressession id is part of message after "HAVE_EXPRESS_SESSION_ID: "
-    expressSessionId = expressSessionIdMessage["HAVE_EXPRESS_SESSION_ID: ".length..]
-    _expressSessionId = expressSessionId
-    removeRizzomaIFrame()
-    makePerformanceTest()
-    setInterval(makePerformanceTest, intervalForPerformanceMeasureInMinutes * 60 * 1000)
+  # expresssession id is part of message after "HAVE_EXPRESS_SESSION_ID: "
+  _expressSessionId = expressSessionIdMessage["HAVE_EXPRESS_SESSION_ID: ".length..]
+  _lastTimeOfGettingAuthId = Date.now()
+  removeRizzomaIFrame()
+  makePerformanceTest()
+  setInterval(makePerformanceTest, intervalForPerformanceMeasureInMinutes * 60 * 1000)
 
 removeRizzomaIFrame = ->
     $('#rizzomaPerformanceIFrame').remove()
